@@ -1,0 +1,124 @@
+<!--
+
+Autor:        Raphael Agneli
+Licensa:    Tem licensa nenhuma não, pode fazer o que quizer com isso aqui rsrs
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Maps markers categories</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <!--Chamando a CSS-->
+        <link rel="stylesheet" type="text/css" href="style.css" />
+
+    </head>
+    <body>
+
+        <!--Chamando a biblioteca jQuery-->
+        <script type="text/javascript" src="jquery.js"></script>
+
+        <!--Chamando a API do Google Maps-->
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+        <!--Script responsável pela criação do mapa-->
+        <script type="text/javascript" >
+            
+            // Chamando a função initialize() quando o documento estiver pronto
+            $(document).ready(function() { initialize(); });
+            
+            // Criando as variáveis necessárias
+            var geocoder;
+            var map;
+            var markers = [];
+        
+            // Função que troca o marcador de acordo com a categoria(type)
+            function getIcon(type) {
+                switch(type) {
+                    case "Pública Federal": return "images/marker_yellow.png";
+                    case "Pública Estadual": return "images/marker_red.png";
+                    case "Privada": return "images/marker_blue.png";
+                    default: return "images/marker_green.png";
+                }
+            }
+
+            // Função que inicializa o mapa
+            function initialize() {
+                geocoder = new google.maps.Geocoder();
+                var latlng = new google.maps.LatLng(-15.494105,-55.209963);
+                var mapOptions = {
+                    zoom: 4,
+                    center: latlng,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                }
+                map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+
+                // JSON com os dados das universidades (Apenas o Endereço(address) é necessário para fazer a marcação no mapa.)
+                
+                // --------------------------------------------------
+                
+                // title         =      Nome da universidade
+                //  site        =      Site da universidade (sem http://)
+                //  phone   =      Telefone da universidade
+                // address  =      Endereço da universidade (rua numero, cidade - estado, país)
+                // type        =      Tipo de universidade (Categoria que determina a cor do marcador no mapa) 
+                
+                var data = [                            
+                    {"title": "Universidade do Oeste Paulista - UNOESTE", "site": "www.unoeste.br", "phone": "0800 7715533", "address": "José Bongiovani 700, Presidente Prudente - São paulo, Brasil", "type": "Privada"},
+                    {"title": "Universidade Tecnológica Federal do Paraná - UTFPR", "site": "www.utfpr.edu.br", "phone": "(41) 3310-4545", "address": "Sete de Setembro 3165, Curitiba - Paraná, Brasil", "type": "Pública Federal"},
+                    {"title": "Universidade Federal do Acre - UFAC", "site": "www.ufac.br", "phone": "(68) 3901-2500", "address": "BR 364 Km 04, Rio Branco - Acre, Brasil", "type": "Pública Federal"},
+                    {"title": "Universidade Federal do Pará - UFPA", "site": "www.ufpa.br", "phone": "(91) 3201-7000", "address": "Augusto Corrêa 01 Belém - Pará, Brasil", "type": ""},
+                    {"title": "Universidade do Estado da Bahia - UNEB", "site": "www.uneb.com.br", "phone": "(71) 3117-2200", "address": "Silveira Martins 2555, Salvador - Bahia, Brasil", "type": "Pública Estadual"}
+                ];
+
+                // Percorrendo o JSON para gerar os marcadores
+                data.forEach(function(mapData, idx) {
+
+                    // Gerando os marcadores
+                    geocoder.geocode( { 'address': mapData.address}, function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            map.setCenter(results[0].geometry.location);
+                            var marker = new google.maps.Marker({
+                                map: map,
+                                position: results[0].geometry.location,
+                                icon: getIcon(mapData.type)
+                            });
+
+                            // HTML com a descrição da universidade (aparece ao clicar sobre o marcador)
+                            var contentHtml =
+                                '<div class="desc-map"><h3>'+mapData.title+'</h3>'+
+                                '<span class="attribute">Tipo:</span><span class="value">'+mapData.type+'</span><br />'+
+                                '<span class="attribute">Site:</span><span class="value"><a href="http://'+mapData.site+'/" target="_blank">'+mapData.site+'</a></span><br />'+
+                                '<span class="attribute">Telefone:</span><span class="value">'+mapData.phone+'</span><br />'+
+                                '<span class="attribute">Endereço:</span><span class="value">'+mapData.address+'</span><br /></div>';                       
+                            
+                            // Gerando a janela de descrição da universidade ao clicar sobre o marcador
+                            var infowindow = new google.maps.InfoWindow({
+                                content: contentHtml
+                            });
+                            google.maps.event.addListener(marker, 'click', function() {
+                                infowindow.open(map,marker);
+                            });
+                            marker.locid = idx+1;
+                            marker.infowindow = infowindow;
+                            markers[markers.length] = marker;
+                            
+                            var sideHtml = '<p class="loc" data-locid="'+marker.locid+'"><b>'+mapData.title+'</b><br/>';
+                            sideHtml += mapData.address + '</p>';
+                            $("#locs").append(sideHtml); 
+
+                        } else {
+                            alert("Geocode was not successful for the following reason: " + status);
+                        }
+                    });
+                });
+            }
+        </script>
+
+        <!--Div onde o mapa aparecerá-->
+        <div id="map_canvas"></div>
+
+    </body>
+</html>

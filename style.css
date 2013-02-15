@@ -1,0 +1,32 @@
+* {
+    padding:0;
+    margin:0;
+    font-family:Arial;
+    font-size:12px;
+}
+
+#map_canvas {
+    width:1000px;
+    height:500px;
+    margin:50px auto 0 auto;
+    /*background: #f90;*/
+}
+
+#map_canvas .desc-map h3 {
+    margin-bottom:10px;
+    color:#165656;
+    font-size:13px;
+}
+
+#map_canvas .desc-map {
+    width:300px;
+    height:auto;
+    /*background:#f90;*/
+}
+
+#map_canvas .desc-map .attribute {
+    height:20px;
+    display:inline-block;
+    color:#165656;
+    width:70px;
+}
